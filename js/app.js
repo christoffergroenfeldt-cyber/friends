@@ -58,11 +58,11 @@ function syncLabel(p) {
 }
 
 let toastTimer;
-function toast(msg) {
+function toast(msg, ms = 2800) {
   $toast.textContent = msg;
   $toast.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { $toast.hidden = true; }, 2800);
+  toastTimer = setTimeout(() => { $toast.hidden = true; }, ms);
 }
 
 function render(html, { refreshable = false } = {}) {
@@ -79,9 +79,12 @@ function topbar(title = '', { back = null, right = '' } = {}) {
     <div class="side right">${right}</div>`;
 }
 
+function errText(err) {
+  return err?.message || err?.error_description || String(err || 'Something went wrong. Try again.');
+}
 function fail(err) {
   console.error(err);
-  toast(err?.message || 'Something went wrong. Try again.');
+  toast(errText(err), 7000);
 }
 
 async function q(promise) {
@@ -184,7 +187,16 @@ async function route() {
     }
     go('#/');
   } catch (e) {
-    fail(e);
+    console.error(e);
+    topbar();
+    render(`
+      <h1>Something went wrong</h1>
+      <div class="notice">${esc(errText(e))}</div>
+      <p class="small muted">If this keeps happening, take a screenshot of this message.</p>
+      <button class="block" id="retry">Try again</button>
+      <button class="block link" id="out">Sign out</button>`);
+    $('#retry').onclick = () => route();
+    $('#out').onclick = async () => { await sb.auth.signOut(); state.session = null; state.me = null; route(); };
   }
 }
 
@@ -237,9 +249,10 @@ function viewLogin() {
       <button class="block" type="submit">Send me a sign-in code</button>
     </form>
     <form id="code-form" class="stack hidden">
-      <p>We've emailed you a 6-digit code. It can take a minute to arrive.</p>
+      <p>We've emailed you a sign-in code. It can take a minute to arrive. Use the code from the newest email.</p>
       <label class="field"><span>Code</span>
-        <input class="code" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required></label>
+        <input class="code" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required></label>
+      <div class="notice hidden" id="login-error"></div>
       <button class="block" type="submit">Sign in</button>
       <button class="link block" type="button" id="restart">Use a different email</button>
     </form>
@@ -268,11 +281,19 @@ function viewLogin() {
     const invite = $('#invite')?.value.trim();
     if (invite) localStorage.setItem(LS_PENDING_INVITE, invite.toLowerCase());
     try {
-      const data = await q(sb.auth.verifyOtp({ email, token: ev.target.code.value.trim(), type: 'email' }));
+      const data = await q(sb.auth.verifyOtp({ email, token: ev.target.code.value.replace(/\s/g, ''), type: 'email' }));
       state.session = data.session;
       state.me = null;
       route();
-    } catch (e) { fail(e); btn.disabled = false; }
+    } catch (e) {
+      console.error(e);
+      const box = $('#login-error');
+      box.textContent = /expired|invalid/i.test(errText(e))
+        ? 'That code is wrong or has expired. Request a new one with "Use a different email" and use the code from the newest email.'
+        : errText(e);
+      box.classList.remove('hidden');
+      btn.disabled = false;
+    }
   };
   $('#restart').onclick = () => {
     $('#code-form').classList.add('hidden');

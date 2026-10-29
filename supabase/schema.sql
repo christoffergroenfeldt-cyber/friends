@@ -356,6 +356,15 @@ grant  execute on function public.create_group(text)    to authenticated;
 grant  execute on function public.join_group(text)      to authenticated;
 grant  execute on function public.regenerate_tokens()   to authenticated;
 
+-- Helper functions used inside the privacy rules. Newer Supabase projects
+-- don't let signed-in users run functions unless this is granted.
+grant  execute on function public.is_member(uuid)       to authenticated;
+grant  execute on function public.shares_group(uuid)    to authenticated;
+grant  execute on function public.plan_member(uuid)     to authenticated;
+grant  execute on function public.option_member(uuid)   to authenticated;
+grant  execute on function public.random_hex(int)       to authenticated, service_role;
+grant  usage on schema public                            to anon, authenticated;
+
 grant select, update                 on public.profiles           to authenticated;
 grant select                         on public.user_tokens        to authenticated;
 grant select, update                 on public.groups             to authenticated;
