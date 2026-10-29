@@ -17,5 +17,5 @@ export const CONFIG = {
   SHORTCUT_URL: 'https://www.icloud.com/shortcuts/c00a956b43f7410f9bb841cce49357a1',
 
   // Must match the shortcut's name exactly – used by the "Sync now" button.
-  SHORTCUT_NAME: 'Friends Sync',
+  SHORTCUT_NAME: 'Friends sync',
 };
