@@ -339,6 +339,7 @@ function syncSection() {
         <li>When the shortcut asks for your sync code, paste this:
           <div class="token" id="sync-token">${esc(t)}</div>
           <button class="link" data-copy="${esc(t)}">Copy sync code</button></li>
+        <li>In the iPhone <b>Settings</b> app, go to <b>Apps → Shortcuts → Advanced</b> and switch on <b>Allow Sharing Large Amounts of Data</b>.</li>
         <li>Run it once and choose <b>Allow</b> when it asks for your calendar and to send data.</li>
         <li>In Shortcuts, open <b>Automation</b> → <b>New Automation</b> → <b>Time of Day</b>, pick a morning time, Daily, choose <b>Run Immediately</b>, then select Friends Sync.</li>
       </ol>

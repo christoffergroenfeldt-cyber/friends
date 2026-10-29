@@ -1,5 +1,5 @@
 // Friends service worker: offline shell + push notifications.
-const CACHE = 'friends-v3';
+const CACHE = 'friends-v4';
 const SHELL = ['./', 'index.html', 'css/app.css', 'js/app.js', 'js/suggest.js', 'js/config.js', 'manifest.webmanifest', 'icons/icon-192.png'];
 
 self.addEventListener('install', (event) => {

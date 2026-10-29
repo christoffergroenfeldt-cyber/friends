@@ -91,7 +91,7 @@ Name the shortcut exactly **Friends Sync** (the app's *Sync now* button runs it 
 
 Make the sync code personal: open the shortcut's settings (ⓘ / Details) → **Import Questions → Add Question**, pick the Text action from step 1 and ask *"Paste your sync code from the Friends app"*. Then **Share → Copy iCloud Link** and paste the link into `js/config.js` → `SHORTCUT_URL`.
 
-Run it once yourself: allow calendar access, and choose **Always Allow** when it asks to connect to supabase.co. The notification should say *Synced N busy times to Friends*.
+First switch on **Settings → Apps → Shortcuts → Advanced → Allow Sharing Large Amounts of Data** (iOS blocks sending hundreds of calendar items otherwise; every friend needs this too). Then run it once yourself: allow calendar access, and choose **Always Allow** when it asks to connect to supabase.co. The notification should say *Synced N busy times to Friends*.
 
 > If your iPhone is in Danish the actions are named e.g. *Find kalenderbegivenheder*, *Gentag med hver*, *Hent indholdet af URL*, and *Is All Day* is *Er heldags*. The app accepts Ja/Nej as well as Yes/No.
 
