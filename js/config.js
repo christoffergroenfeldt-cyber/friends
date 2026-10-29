@@ -4,10 +4,10 @@
 // ---------------------------------------------------------------
 export const CONFIG = {
   // Supabase → Project Settings → API → Project URL
-  SUPABASE_URL: 'https://YOUR-PROJECT.supabase.co',
+  SUPABASE_URL: 'https://supabase.com/dashboard/project/rtmiutusczdvoyxcprvl/',
 
   // Supabase → Project Settings → API Keys → anon / publishable key
-  SUPABASE_ANON_KEY: 'YOUR-ANON-KEY',
+  SUPABASE_ANON_KEY: 'sb_publishable_VHEgfroy-bg7bvmtNz695A_L-fChpZV',
 
   // Public VAPID key for push notifications (generate with tools/vapid.html).
   // Leave empty to run without notifications.
