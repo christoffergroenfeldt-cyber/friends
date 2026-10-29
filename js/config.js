@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------
 export const CONFIG = {
   // Supabase → Project Settings → API → Project URL
-  SUPABASE_URL: 'https://supabase.com/dashboard/project/rtmiutusczdvoyxcprvl/',
+  SUPABASE_URL: 'https://rtmiutusczdvoyxcprvl.supabase.co',
 
   // Supabase → Project Settings → API Keys → anon / publishable key
   SUPABASE_ANON_KEY: 'sb_publishable_VHEgfroy-bg7bvmtNz695A_L-fChpZV',
