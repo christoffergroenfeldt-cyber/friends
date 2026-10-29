@@ -344,10 +344,40 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------
+-- Faster variant for the Shortcut: no Repeat loop needed.
+-- The Shortcut sends three lists (one item per line, same order):
+--   p_starts: start times, p_ends: end times, p_allday: Yes/No per event
+-- They are paired up line by line and checked by sync_busy above,
+-- so the same strict rules apply.
+-- ---------------------------------------------------------------------
+create or replace function public.sync_busy_lists(p_token text, p_starts text, p_ends text, p_allday text)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  s text[] := array_remove(regexp_split_to_array(trim(coalesce(p_starts, '')), E'\\s*\\r?\\n\\s*'), '');
+  e text[] := array_remove(regexp_split_to_array(trim(coalesce(p_ends,   '')), E'\\s*\\r?\\n\\s*'), '');
+  a text[] := array_remove(regexp_split_to_array(trim(coalesce(p_allday, '')), E'\\s*\\r?\\n\\s*'), '');
+  ns int := coalesce(array_length(s, 1), 0);
+  ne int := coalesce(array_length(e, 1), 0);
+  na int := coalesce(array_length(a, 1), 0);
+  lines text[] := '{}';
+  i int;
+begin
+  if ns <> ne or ns <> na then
+    raise exception 'Rejected: got % start times, % end times and % all-day values. They must match. Nothing was saved.', ns, ne, na;
+  end if;
+  for i in 1 .. ns loop
+    lines := lines || (s[i] || '|' || e[i] || '|' || a[i]);
+  end loop;
+  return public.sync_busy(p_token, array_to_string(lines, E'\n'));
+end $$;
+
+-- ---------------------------------------------------------------------
 -- Permissions
 -- ---------------------------------------------------------------------
 revoke execute on function public.sync_busy(text, text) from public;
 grant  execute on function public.sync_busy(text, text) to anon, authenticated;
+revoke execute on function public.sync_busy_lists(text, text, text, text) from public;
+grant  execute on function public.sync_busy_lists(text, text, text, text) to anon, authenticated;
 
 revoke execute on function public.create_group(text)    from public, anon;
 revoke execute on function public.join_group(text)      from public, anon;

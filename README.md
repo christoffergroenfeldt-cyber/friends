@@ -70,23 +70,22 @@ Notifications on iPhone only work when Friends is added to the Home Screen and o
 ### 6. Build the calendar Shortcut (once, then share it)
 You build it once on your iPhone and share an iCloud link; your friends just install it.
 
-Open **Shortcuts → +** and add these actions in order. Replace `YOUR-PROJECT` and `YOUR-ANON-KEY` with the values from `js/config.js`.
+Open **Shortcuts → +** and add these actions in order. Replace `YOUR-PROJECT` and `YOUR-ANON-KEY` with the values from `js/config.js`. There is no Repeat loop, so it runs in a second or two even with hundreds of events.
 
-1. **Text** – type `PASTE-YOUR-SYNC-CODE`.
-2. **Set Variable** – name it `Token`, input: *Text*.
-3. **Find Calendar Events** – *All Calendar Events*, add filter **Start Date** *is in the next* **90 days**. Leave *Limit* off.
-4. **Repeat with Each** – input: *Calendar Events*. Inside the repeat, add:
-   - **Text** containing: `Start Date|End Date|Is All Day`
-     where each word is the *Repeat Item* variable with that property picked (tap the variable → choose the property).
-     For **Start Date** and **End Date**, tap the variable again and set **Date Format: ISO 8601** with **Include ISO 8601 Time** turned on.
-     The result should look like `2026-11-06T18:00:00+01:00|2026-11-06T22:00:00+01:00|No`.
-5. After **End Repeat**: **Combine Text** – *Repeat Results* with **New Lines**.
-6. **Get Contents of URL**
-   - URL: `https://YOUR-PROJECT.supabase.co/rest/v1/rpc/sync_busy`
-   - Method: **POST**
-   - Headers: `apikey` = `YOUR-ANON-KEY`
-   - Request Body: **JSON**, two Text fields: `p_token` = variable *Token*, `p_events` = *Combined Text*
-7. **Show Notification** – *Contents of URL*.
+1. **Text** – your sync code (for the shared copy: `PASTE-YOUR-SYNC-CODE`).
+2. **Set Variable** – name `Token`, input *Text*.
+3. **Find Calendar Events** – *All Calendar Events*, filter **Start Date** *is in the next* **90 days**, *Limit* off.
+4. **Text** – insert the variable *Calendar Events*, tap it, choose **Start Date**, tap again and set **Date Format: ISO 8601** with **Include ISO 8601 Time** on. Nothing else in the box.
+5. **Set Variable** – `Starts`, input *Text*.
+6. **Text** – *Calendar Events* → **End Date**, same ISO 8601 format.
+7. **Set Variable** – `Ends`, input *Text*.
+8. **Text** – *Calendar Events* → **Is All Day**.
+9. **Set Variable** – `AllDay`, input *Text*.
+10. **Get Contents of URL**
+    - URL: `https://YOUR-PROJECT.supabase.co/rest/v1/rpc/sync_busy_lists`
+    - Method: **POST**, Header `apikey` = `YOUR-ANON-KEY`
+    - Request Body **JSON**, four Text fields: `p_token` = *Token*, `p_starts` = *Starts*, `p_ends` = *Ends*, `p_allday` = *AllDay*
+11. **Show Notification** – *Contents of URL*.
 
 Name the shortcut exactly **Friends Sync** (the app's *Sync now* button runs it by name).
 
