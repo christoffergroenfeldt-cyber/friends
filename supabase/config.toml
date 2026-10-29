@@ -1,0 +1,9 @@
+# Only used if you deploy with the Supabase CLI (`supabase functions deploy`).
+# If you create the functions in the Supabase dashboard instead, set the same
+# "Verify JWT" switches there.
+
+[functions.notify]
+verify_jwt = true
+
+[functions.ics]
+verify_jwt = false

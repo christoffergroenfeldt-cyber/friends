@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notification keys</title>
+  <style>
+    body { font: 17px/1.45 -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px 16px; background: #EEF1F6; color: #1C2333; }
+    h1 { font-size: 26px; margin: 0 0 8px; }
+    pre { background: #fff; border-radius: 12px; padding: 12px; white-space: pre-wrap; word-break: break-all; font-size: 14px; user-select: all; -webkit-user-select: all; }
+    button { font: 600 17px/1 inherit; border: 0; border-radius: 14px; padding: 15px 18px; background: #3346D3; color: #fff; width: 100%; }
+    .warn { background: #F8EBCB; border-radius: 12px; padding: 12px; }
+    @media (prefers-color-scheme: dark) { body { background: #121723; color: #E8ECF4; } pre { background: #1B2130; } .warn { background: #3D3218; } }
+  </style>
+</head>
+<body>
+  <h1>Notification keys</h1>
+  <p>Makes the key pair Friends uses to send notifications. The keys are made on this device and never sent anywhere.</p>
+  <button id="go">Make keys</button>
+  <div id="out" hidden>
+    <p><b>Public key</b>: put this in <code>js/config.js</code> as <code>VAPID_PUBLIC_KEY</code> and as the Supabase secret <code>VAPID_PUBLIC_KEY</code>.</p>
+    <pre id="pub"></pre>
+    <p><b>Private key</b>: only goes into the Supabase secret <code>VAPID_PRIVATE_KEY</code>. Never put it in the repository.</p>
+    <pre id="priv"></pre>
+    <p class="warn">Make keys once. If you make new ones later, everyone has to turn notifications on again.</p>
+  </div>
+  <script>
+    const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    document.getElementById('go').onclick = async () => {
+      const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+      document.getElementById('pub').textContent = b64url(await crypto.subtle.exportKey('raw', kp.publicKey));
+      document.getElementById('priv').textContent = (await crypto.subtle.exportKey('jwk', kp.privateKey)).d;
+      document.getElementById('out').hidden = false;
+    };
+  </script>
+</body>
+</html>
