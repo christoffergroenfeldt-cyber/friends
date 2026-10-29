@@ -55,7 +55,7 @@ function calendar(name: string, plans: Plan[]) {
   return lines.map(fold).join('\r\n') + '\r\n';
 }
 
-const SELECT = 'id,title,note,status,locked_option_id,plan_options(id,starts_at,ends_at),groups(name)';
+const SELECT = 'id,title,note,status,locked_option_id,plan_options!plan_options_plan_id_fkey(id,starts_at,ends_at),groups(name)';
 
 Deno.serve(async (req) => {
   const params = new URL(req.url).searchParams;

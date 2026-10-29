@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     } else {
       const { data: plan, error } = await admin
         .from('plans')
-        .select('id,title,group_id,created_by,status,locked_option_id,plan_options(id,starts_at,ends_at)')
+        .select('id,title,group_id,created_by,status,locked_option_id,plan_options!plan_options_plan_id_fkey(id,starts_at,ends_at)')
         .eq('id', plan_id)
         .single();
       if (error || !plan) return json({ error: 'Plan not found' }, 404);

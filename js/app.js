@@ -371,7 +371,7 @@ async function viewHome() {
   const uid = state.me.id;
   const [groups, plans, myVotes] = await Promise.all([
     q(sb.from('groups').select('id,name').order('created_at')),
-    q(sb.from('plans').select('id,title,group_id,status,deadline,created_by,locked_option_id,plan_options(id,starts_at,ends_at)').in('status', ['open', 'locked']).order('created_at', { ascending: false })),
+    q(sb.from('plans').select('id,title,group_id,status,deadline,created_by,locked_option_id,plan_options!plan_options_plan_id_fkey(id,starts_at,ends_at)').in('status', ['open', 'locked']).order('created_at', { ascending: false })),
     q(sb.from('votes').select('option_id').eq('user_id', uid)),
   ]);
   const voted = new Set(myVotes.map((v) => v.option_id));
@@ -443,7 +443,7 @@ async function viewGroup(gid) {
   const [group, people, plans] = await Promise.all([
     q(sb.from('groups').select('*').eq('id', gid).single()),
     loadGroupPeople(gid),
-    q(sb.from('plans').select('id,title,status,locked_option_id,plan_options(id,starts_at,ends_at)').eq('group_id', gid).order('created_at', { ascending: false }).limit(20)),
+    q(sb.from('plans').select('id,title,status,locked_option_id,plan_options!plan_options_plan_id_fkey(id,starts_at,ends_at)').eq('group_id', gid).order('created_at', { ascending: false }).limit(20)),
   ]);
   topbar(group.name, { back: '#/' });
 
@@ -683,7 +683,7 @@ function showSuggestions({ gid, people, f, result, from, to, durationMin }) {
 // Plan: vote, lock, add to calendar
 // ===================================================================
 async function viewPlan(pid) {
-  const plan = await q(sb.from('plans').select('*, plan_options(*)').eq('id', pid).single());
+  const plan = await q(sb.from('plans').select('*, plan_options!plan_options_plan_id_fkey(*)').eq('id', pid).single());
   const options = plan.plan_options.sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
   const [group, people, votes] = await Promise.all([
     q(sb.from('groups').select('id,name').eq('id', plan.group_id).single()),
