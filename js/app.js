@@ -336,7 +336,7 @@ function syncSection() {
         <li>${hasShortcut
           ? `<a class="btn quiet" href="${esc(CONFIG.SHORTCUT_URL)}" target="_blank" rel="noopener">Get the Friends Sync shortcut</a>`
           : 'Get the <b>Friends Sync</b> shortcut from whoever set up the app.'}</li>
-        <li>When the shortcut asks for your sync code, paste this:
+        <li>Tap <b>Add Shortcut</b>. When it asks for your sync code, paste this:
           <div class="token" id="sync-token">${esc(t)}</div>
           <button class="link" data-copy="${esc(t)}">Copy sync code</button></li>
         <li>In the iPhone <b>Settings</b> app, go to <b>Apps → Shortcuts → Advanced</b> and switch on <b>Allow Sharing Large Amounts of Data</b>.</li>
