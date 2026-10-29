@@ -260,54 +260,78 @@ $$;
 -- ---------------------------------------------------------------------
 -- Called by the iOS Shortcut (no login – authenticated by sync token).
 --
--- p_events: one event per line, fields separated by "|":
+-- p_events: one event per line, exactly three fields separated by "|":
 --   START|END|ALLDAY
 --   2026-11-06T18:00:00+01:00|2026-11-06T22:00:00+01:00|No
--- ALLDAY accepts yes/no, true/false, 1/0, ja/nej.
--- Replaces all previously synced calendar blocks for that person.
+-- START/END must be ISO 8601 date-times with a time zone.
+-- ALLDAY must be yes/no, true/false, 1/0 or ja/nej.
+--
+-- Strict on purpose: only busy times may ever reach the database.
+-- If ANY line contains anything else (an event title, a place, a 4th
+-- field…), the whole upload is rejected and nothing is saved. The error
+-- names the line number only, never its content.
 -- ---------------------------------------------------------------------
 create or replace function public.sync_busy(p_token text, p_events text)
 returns text language plpgsql security definer set search_path = public as $$
 declare
+  iso_re  constant text := '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}(:?\d{2})?)$';
+  flag_re constant text := '^(yes|no|true|false|1|0|ja|nej)$';
   uid     uuid;
-  line    text;
+  lines   text[];
   parts   text[];
+  i       int;
   s       timestamptz;
   e       timestamptz;
-  ad      boolean;
+  starts  timestamptz[] := '{}';
+  ends    timestamptz[] := '{}';
+  flags   boolean[]     := '{}';
   n_ok    int := 0;
-  n_bad   int := 0;
 begin
-  select user_id into uid from public.user_tokens where sync_token = trim(p_token);
+  select user_id into uid from public.user_tokens where sync_token = trim(coalesce(p_token, ''));
   if uid is null then
-    raise exception 'Unknown sync token – copy it again from the app (Settings → Calendar sync)';
+    raise exception 'Unknown sync code. Copy it again from the Friends app (Settings → Calendar sync).';
   end if;
 
-  delete from public.busy_blocks where user_id = uid and source = 'calendar';
+  if length(coalesce(p_events, '')) > 500000 then
+    raise exception 'Upload too large. Nothing was saved.';
+  end if;
 
-  foreach line in array regexp_split_to_array(coalesce(p_events, ''), E'\\r?\\n') loop
-    line := trim(line);
-    continue when line = '';
-    parts := string_to_array(line, '|');
+  lines := regexp_split_to_array(coalesce(p_events, ''), E'\\r?\\n');
+
+  -- 1) Validate every line before touching anything.
+  for i in 1 .. coalesce(array_length(lines, 1), 0) loop
+    continue when trim(lines[i]) = '';
+    parts := string_to_array(trim(lines[i]), '|');
+    if array_length(parts, 1) <> 3
+       or trim(parts[1]) !~ iso_re
+       or trim(parts[2]) !~ iso_re
+       or lower(trim(parts[3])) !~ flag_re then
+      raise exception 'Rejected: line % is not START|END|ALLDAY. Only busy times may be sent, so nothing was saved. Check the Friends Sync shortcut.', i;
+    end if;
     begin
-      s  := trim(parts[1])::timestamptz;
-      e  := trim(parts[2])::timestamptz;
-      ad := lower(trim(coalesce(parts[3], ''))) in ('yes', 'true', '1', 'ja');
-      if e <= s then e := s + interval '1 minute'; end if;
-      continue when e < now() - interval '1 day';          -- ignore the past
-      continue when s > now() + interval '400 days';
-      insert into public.busy_blocks (user_id, starts_at, ends_at, all_day, source)
-      values (uid, s, e, ad, 'calendar');
-      n_ok := n_ok + 1;
+      s := trim(parts[1])::timestamptz;
+      e := trim(parts[2])::timestamptz;
     exception when others then
-      n_bad := n_bad + 1;
+      raise exception 'Rejected: line % has an invalid date. Nothing was saved.', i;
     end;
+    if e <= s then e := s + interval '1 minute'; end if;
+    continue when e < now() - interval '1 day';          -- ignore the past
+    continue when s > now() + interval '400 days';
+    starts := starts || s;
+    ends   := ends   || e;
+    flags  := flags  || (lower(trim(parts[3])) in ('yes', 'true', '1', 'ja'));
+  end loop;
+
+  -- 2) All lines are clean: replace this person's synced busy times.
+  delete from public.busy_blocks where user_id = uid and source = 'calendar';
+  for i in 1 .. coalesce(array_length(starts, 1), 0) loop
+    insert into public.busy_blocks (user_id, starts_at, ends_at, all_day, source)
+    values (uid, starts[i], ends[i], flags[i], 'calendar');
+    n_ok := n_ok + 1;
   end loop;
 
   update public.profiles set last_synced_at = now() where id = uid;
-
-  return format('Synced %s events to Friends%s', n_ok,
-                case when n_bad > 0 then format(' (%s lines skipped)', n_bad) else '' end);
+  return format('Synced %s busy times to Friends', n_ok);
 end $$;
 
 -- ---------------------------------------------------------------------

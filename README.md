@@ -92,7 +92,7 @@ Name the shortcut exactly **Friends Sync** (the app's *Sync now* button runs it 
 
 Make the sync code personal: open the shortcut's settings (ⓘ / Details) → **Import Questions → Add Question**, pick the Text action from step 1 and ask *"Paste your sync code from the Friends app"*. Then **Share → Copy iCloud Link** and paste the link into `js/config.js` → `SHORTCUT_URL`.
 
-Run it once yourself: allow calendar access, and choose **Always Allow** when it asks to connect to supabase.co. The notification should say *Synced N events to Friends*.
+Run it once yourself: allow calendar access, and choose **Always Allow** when it asks to connect to supabase.co. The notification should say *Synced N busy times to Friends*.
 
 > If your iPhone is in Danish the actions are named e.g. *Find kalenderbegivenheder*, *Gentag med hver*, *Hent indholdet af URL*, and *Is All Day* is *Er heldags*. The app accepts Ja/Nej as well as Yes/No.
 
@@ -103,7 +103,7 @@ In the app: create a group → **Share invite**. On their iPhone the link explai
 
 ## How it works
 
-**Privacy.** The Shortcut sends only start/end times and whether an event is all-day. People only see busy times of people they share a group with (enforced in the database with row level security). Anyone can turn off *All-day events make me busy* for birthdays etc., and add extra busy times by hand.
+**Privacy.** The Shortcut sends only start/end times and whether an event is all-day. The database has no column that could hold event text, and the sync is strict: every line must be exactly `START|END|ALLDAY`. If any line contains anything else (a title, a place, an extra field), the whole upload is rejected, nothing is saved, and the Shortcut shows an error naming the line number, never its content. People only see busy times of people they share a group with (enforced in the database with row level security). Anyone can turn off *All-day events make me busy* for birthdays etc., and add extra busy times by hand.
 
 **Suggestions** (`js/suggest.js`). For each day in the look-ahead period, the app tries every start time (every 30 min) inside the chosen windows, checks who is free, and keeps the best time per day. Days are ranked by: everyone marked *must be there* is free → most people free → soonest. People who have never synced are shown as *unknown* rather than assumed free.
 
