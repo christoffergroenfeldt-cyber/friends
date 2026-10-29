@@ -4,7 +4,12 @@
 -- It is safe to re-run: it drops and recreates functions/policies.
 -- =====================================================================
 
-create extension if not exists pgcrypto;
+-- Random tokens come from gen_random_uuid(), which is built into Postgres,
+-- so no extension is needed.
+create or replace function public.random_hex(n int)
+returns text language sql volatile set search_path = public as $$
+  select substr(replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', ''), 1, n);
+$$;
 
 -- ---------------------------------------------------------------------
 -- Tables
@@ -24,14 +29,14 @@ create table if not exists public.profiles (
 --   feed_token: used by the calendar subscription feed
 create table if not exists public.user_tokens (
   user_id    uuid primary key references auth.users on delete cascade,
-  sync_token text not null unique default encode(gen_random_bytes(18), 'hex'),
-  feed_token text not null unique default encode(gen_random_bytes(18), 'hex')
+  sync_token text not null unique default public.random_hex(48),
+  feed_token text not null unique default public.random_hex(48)
 );
 
 create table if not exists public.groups (
   id          uuid primary key default gen_random_uuid(),
   name        text not null,
-  invite_code text not null unique default lower(encode(gen_random_bytes(5), 'hex')),
+  invite_code text not null unique default public.random_hex(10),
   created_by  uuid not null references auth.users on delete cascade,
   created_at  timestamptz not null default now()
 );
@@ -101,6 +106,10 @@ create table if not exists public.push_subscriptions (
   auth       text not null,
   created_at timestamptz not null default now()
 );
+
+alter table public.user_tokens alter column sync_token  set default public.random_hex(48);
+alter table public.user_tokens alter column feed_token  set default public.random_hex(48);
+alter table public.groups      alter column invite_code set default public.random_hex(10);
 
 -- ---------------------------------------------------------------------
 -- New user → profile + tokens
@@ -252,8 +261,8 @@ end $$;
 create or replace function public.regenerate_tokens()
 returns void language sql security definer set search_path = public as $$
   update public.user_tokens
-     set sync_token = encode(gen_random_bytes(18), 'hex'),
-         feed_token = encode(gen_random_bytes(18), 'hex')
+     set sync_token = public.random_hex(48),
+         feed_token = public.random_hex(48)
    where user_id = auth.uid();
 $$;
 
