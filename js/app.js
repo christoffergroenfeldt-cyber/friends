@@ -230,6 +230,7 @@ function viewInstall(code) {
       </ol>
       <p class="token center" style="font-size:24px">${esc(code)}</p>
     </div>
+    <a class="btn block quiet" href="guide.html" style="margin-top:14px">Watch the setup guide (1½ min)</a>
     <p class="center"><button class="link" id="browser">Use it in Safari instead</button></p>`);
   $('#browser').onclick = () => {
     sessionStorage.setItem('friends.continueInBrowser', '1');
@@ -332,6 +333,7 @@ function syncSection() {
     <div class="card stack">
       <div class="row between"><h3>Calendar sync</h3>${syncLabel(state.me)}</div>
       <p class="small muted">A Shortcut on your iPhone reads when you're busy and sends only the start and end times. Event names, places and notes never leave your phone.</p>
+      <a class="btn block quiet" href="guide.html">Watch how to set it up (1½ min)</a>
       <ol class="steps">
         <li>${hasShortcut
           ? `<a class="btn quiet" href="${esc(CONFIG.SHORTCUT_URL)}" target="_blank" rel="noopener">Get the Friends Sync shortcut</a>`
@@ -482,7 +484,8 @@ async function viewGroup(gid) {
 
   $('#share').onclick = async () => {
     const url = inviteUrl(group.invite_code);
-    const text = `Join "${group.name}" on Friends so we can find dates that work for everyone. Invite code: ${group.invite_code}`;
+    const guide = `${location.origin}${location.pathname}guide.html`;
+    const text = `Join "${group.name}" on Friends so we can find dates that work for everyone. Invite code: ${group.invite_code}\n\nSetup guide (1½ min): ${guide}`;
     if (navigator.share) { try { await navigator.share({ title: 'Friends', text, url }); } catch {} }
     else copy(url, 'Invite link copied');
   };

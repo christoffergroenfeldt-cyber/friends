@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Friends setup guide</title>
+<meta name="theme-color" content="#EEF1F6">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EEF1F6; --ink: #1C2333; --muted: #5B6478; --accent: #3346D3; --free: #1F8A58;
+    --ios-bg: #F2F2F7; --ios-line: #D8D8DE; --ios-blue: #0A7AFF; --ios-grey: #8E8E93;
+    --display: "Bricolage Grotesque", -apple-system, system-ui, sans-serif;
+    --body: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.4 var(--body); -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 420px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; padding: 14px 16px 16px; gap: 10px; }
+
+  .head .count { font-size: 13px; color: var(--muted); }
+  .head h1 { font: 800 25px/1.1 var(--display); margin: 2px 0 0; letter-spacing: -0.01em; }
+  .bar { display: grid; gap: 4px; margin-top: 10px; }
+  .bar i { display: block; height: 4px; border-radius: 4px; background: #D6DCE7; overflow: hidden; }
+  .bar i b { display: block; height: 100%; width: 0; background: var(--accent); }
+
+  /* The phone screen */
+  .screen {
+    position: relative; flex: none; width: 100%; aspect-ratio: 300 / 430;
+    border-radius: 30px; overflow: hidden; background: var(--ios-bg);
+    border: 7px solid #1C2333; box-shadow: 0 10px 30px rgba(28,35,51,.18);
+    font-size: 13px;
+  }
+  .frame { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .sb { display: flex; justify-content: space-between; padding: 8px 18px 4px; font-weight: 600; font-size: 12px; flex: none; }
+  .sb span { letter-spacing: 1px; }
+  .fill { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+  .pad { padding: 8px 14px; }
+
+  .caption { font-size: 17px; line-height: 1.35; min-height: 3.2em; }
+  .caption b { font-weight: 700; }
+  .controls { display: flex; gap: 8px; }
+  .controls button { flex: 1; font: 600 15px/1 var(--body); border: 0; border-radius: 12px; padding: 13px 8px; background: #E1E6EF; color: var(--ink); }
+  .controls button.main { background: var(--accent); color: #fff; }
+  .controls a { flex: 1; text-align: center; font: 600 15px/1 var(--body); border-radius: 12px; padding: 13px 8px; background: none; color: var(--accent); text-decoration: none; }
+  body.record .controls { display: none; }
+
+  /* Tap marker */
+  .tapmark { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; pointer-events: none; z-index: 30; }
+  .tapmark::before, .tapmark::after { content: ""; position: absolute; inset: 0; border-radius: 50%; }
+  .tapmark::before { background: rgba(51,70,211,.10); border: 2.5px solid #3346D3; transform: scale(var(--s1, 1)); opacity: var(--o1, 1); }
+  .tapmark::after { border: 2.5px solid #3346D3; transform: scale(var(--s2, 1)); opacity: var(--o2, 0); }
+
+  /* ---- iOS-ish building blocks ---- */
+  .safari-bar { flex: none; background: #F8F8FA; border-top: 1px solid var(--ios-line); padding: 6px 10px 10px; }
+  .url { background: #E9E9EE; border-radius: 10px; text-align: center; font-size: 11px; padding: 6px; color: #333; margin-bottom: 6px; }
+  .tools { display: flex; justify-content: space-around; align-items: center; color: var(--ios-blue); }
+  .tools svg { width: 20px; height: 20px; display: block; }
+  .page { padding: 12px 16px; background: #fff; height: 100%; }
+  .page h2 { font: 800 21px/1.1 var(--display); margin: 6px 0 6px; }
+  .page p { margin: 0 0 8px; color: var(--muted); font-size: 12px; }
+  .fbtn { background: var(--accent); color: #fff; border-radius: 10px; text-align: center; font-weight: 600; padding: 10px; font-size: 13px; margin-top: 8px; }
+  .fbtn.quiet { background: #E3E8F0; color: var(--ink); }
+  .field { border: 1px solid #D6DCE7; border-radius: 9px; padding: 9px 10px; font-size: 13px; background: #fff; margin-top: 4px; }
+  .label { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .code { font: 700 20px/1 var(--display); letter-spacing: .25em; text-align: center; }
+  .token { font: 600 11px/1.3 ui-monospace, Menlo, monospace; background: #E3E8F0; border-radius: 8px; padding: 8px; word-break: break-all; }
+  .link { color: var(--accent); font-weight: 600; font-size: 12px; margin-top: 6px; display: inline-block; }
+  .card { background: #fff; border-radius: 12px; padding: 10px 12px; margin: 8px 0; }
+  .ok { color: var(--free); font-size: 11px; }
+
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,.28); z-index: 5; }
+  .sheet { position: absolute; left: 6px; right: 6px; bottom: 6px; background: #F2F2F7; border-radius: 16px; z-index: 6; padding: 8px; }
+  .rows { background: #fff; border-radius: 11px; overflow: hidden; }
+  .rows div { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; font-size: 13px; }
+  .rows div + div { border-top: 1px solid #E5E5EA; }
+  .rows .chev::after { content: "›"; color: #C4C4C7; font-size: 18px; line-height: 1; }
+  .rows small { color: var(--ios-grey); }
+  .group-title { font-size: 11px; color: var(--ios-grey); margin: 10px 4px 4px; text-transform: none; }
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 4px 12px 8px; font-weight: 600; flex: none; }
+  .nav .t { font-size: 15px; }
+  .nav .a { color: var(--ios-blue); font-weight: 400; min-width: 40px; }
+  .nav .a.r { text-align: right; font-weight: 600; }
+  .bigtitle { font: 700 24px/1.1 -apple-system, system-ui, sans-serif; padding: 0 14px 6px; }
+
+  .switch { width: 38px; height: 23px; border-radius: 12px; background: #E5E5EA; position: relative; flex: none; }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .switch.on { background: #34C759; }
+  .switch.on::after { left: 17px; }
+
+  .home { background: linear-gradient(160deg, #6E8BD9, #B88ACB 60%, #E9A68C); height: 100%; padding: 16px 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 8px; align-content: start; }
+  .app { text-align: center; color: #fff; font-size: 9.5px; }
+  .app i { display: block; width: 46px; height: 46px; border-radius: 12px; margin: 0 auto 4px; background-size: cover; }
+
+  .alert { position: absolute; left: 34px; right: 34px; top: 36%; background: #F2F2F7; border-radius: 14px; z-index: 6; text-align: center; overflow: hidden; }
+  .alert .msg { padding: 14px 14px 10px; }
+  .alert .msg b { display: block; font-size: 13px; margin-bottom: 4px; }
+  .alert .msg span { font-size: 11px; color: #333; }
+  .alert .btns div { border-top: 1px solid #D1D1D6; color: var(--ios-blue); padding: 9px; font-size: 13px; }
+  .alert .btns div.b { font-weight: 600; }
+
+  .banner { position: absolute; left: 8px; right: 8px; top: 30px; background: rgba(250,250,252,.97); border-radius: 14px; padding: 9px 10px; display: flex; gap: 8px; align-items: center; box-shadow: 0 6px 18px rgba(0,0,0,.18); z-index: 7; }
+  .banner i { width: 30px; height: 30px; border-radius: 8px; flex: none; background-size: cover; }
+  .banner b { display: block; font-size: 12px; }
+  .banner span { font-size: 12px; }
+
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 6px 12px; }
+  .tile { border-radius: 14px; height: 74px; padding: 9px; color: #fff; font-weight: 600; font-size: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+  .tabs { flex: none; display: flex; justify-content: space-around; border-top: 1px solid var(--ios-line); background: #F8F8FA; padding: 7px 0 11px; font-size: 10px; color: var(--ios-grey); }
+  .tabs .on { color: var(--ios-blue); font-weight: 600; }
+
+  .action { background: #fff; border-radius: 12px; padding: 10px 12px; margin: 8px 12px; font-size: 13px; }
+  .pill { color: var(--ios-blue); background: #E8F1FF; border-radius: 6px; padding: 1px 5px; }
+  .search { margin: 8px 12px; background: #E3E3E8; border-radius: 10px; padding: 7px 10px; color: var(--ios-grey); font-size: 13px; }
+  .search.typed { color: #000; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="count" id="count"></div>
+    <h1 id="title"></h1>
+    <div class="bar" id="bar"></div>
+  </div>
+  <div class="screen" id="screen"></div>
+  <div class="caption" id="caption" aria-live="polite"></div>
+  <div class="controls">
+    <button id="prev" aria-label="Previous">Back</button>
+    <button id="play" class="main">Pause</button>
+    <button id="next" aria-label="Next">Next</button>
+  </div>
+  <div class="controls"><a href="./#/settings">Open Friends</a></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- helpers
+const ICON = 'icons/icon-192.png';
+const SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>';
+const sb = (dark) => `<div class="sb" style="${dark ? 'color:#fff' : ''}"><b>9:41</b><span>▮▮▮ ◔ ▬</span></div>`;
+const safari = (page, tapShare) => `${sb()}<div class="fill">${page}</div>
+  <div class="safari-bar"><div class="url">christoffergroenfeldt-cyber.github.io</div>
+  <div class="tools"><span>‹</span><span style="opacity:.4">›</span><span class="${tapShare ? 'tap' : ''}">${SHARE}</span><span>▢</span><span>⧉</span></div></div>`;
+const invitePage = `<div class="page"><h2>You're invited</h2><p>Friends finds the dates when everyone is free.</p>
+  <p>1. Tap Share in Safari.<br>2. Choose Add to Home Screen.<br>3. Open Friends and sign in.</p></div>`;
+const friendsPage = (inner) => `${sb()}<div class="fill"><div class="page" style="background:#EEF1F6">${inner}</div></div>`;
+const nav = (left, title, right = '', tapRight = false) =>
+  `<div class="nav"><span class="a">${left}</span><span class="t">${title}</span><span class="a r ${tapRight ? 'tap' : ''}">${right}</span></div>`;
+const syncCard = (tap) => `<div class="card"><b>Calendar sync</b>
+  <ol style="padding-left:16px;margin:6px 0;font-size:12px">
+    <li><span class="fbtn quiet ${tap === 'get' ? 'tap' : ''}" style="display:block;margin:4px 0">Get the Friends Sync shortcut</span></li>
+    <li>Paste this sync code when asked:<div class="token">4f7c19e2a0b84d6c9e31f5a7b2d08c6e</div>
+      <span class="link ${tap === 'copy' ? 'tap' : ''}">Copy sync code</span></li>
+  </ol></div>`;
+
+// ---------------------------------------------------------------- the guide
+const STEPS = [
+  { title: 'Add Friends to your Home Screen', frames: [
+    { screen: safari(invitePage, true), caption: 'Open the invite link in <b>Safari</b> and tap the <b>Share</b> button.' },
+    { screen: safari(invitePage) + `<div class="dim"></div><div class="sheet"><div class="rows">
+        <div>Copy <small>⧉</small></div><div>Add to Reading List <small>◎</small></div>
+        <div class="tap">Add to Home Screen <small>⊞</small></div><div>Add Bookmark <small>☆</small></div></div></div>`,
+      caption: 'Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.' },
+    { screen: `<div class="home" style="padding-top:34px">
+        ${['#34C759', '#FF9500', '#5856D6', '#FF2D55', '#0A7AFF', '#8E8E93', '#FFCC00'].map((c, i) =>
+          `<div class="app"><i style="background:${c}"></i>${['Messages', 'Photos', 'Podcasts', 'Music', 'Mail', 'Settings', 'Notes'][i]}</div>`).join('')}
+        <div class="app tap"><i style="background-image:url(${ICON})"></i>Friends</div></div>`,
+      caption: 'Open <b>Friends</b> from your Home Screen. Always use this icon from now on.' },
+  ]},
+  { title: 'Sign in with your email', frames: [
+    { screen: friendsPage(`<h2>Friends</h2><div class="label">Your email</div><div class="field">anna@example.com</div>
+        <div class="fbtn tap">Send me a sign-in code</div>`),
+      caption: 'Type your email and tap <b>Send me a sign-in code</b>.' },
+    { screen: friendsPage(`<h2>Friends</h2><p style="color:var(--ink)">We've emailed you a sign-in code.</p>
+        <div class="label">Code</div><div class="field code">48 21 93 07</div><div class="fbtn tap">Sign in</div>`)
+        + `<div class="banner"><i style="background:#0A7AFF"></i><div><b>Your Friends code</b><span>Enter this code in the app: 48219307</span></div></div>`,
+      caption: 'Check your mail, type the <b>code</b> into Friends and tap <b>Sign in</b>.' },
+    { screen: friendsPage(`<h2>Welcome</h2><p>What should your friends see you as?</p>
+        <div class="label">Your name</div><div class="field">Anna</div><div class="fbtn tap">Continue</div>`),
+      caption: 'Enter your name and tap <b>Continue</b>.' },
+  ]},
+  { title: 'Get the calendar shortcut', frames: [
+    { screen: friendsPage(`<h2 style="font-size:17px">Connect your calendar</h2>${syncCard('copy')}`),
+      caption: 'First tap <b>Copy sync code</b>. It is your personal code.' },
+    { screen: friendsPage(`<h2 style="font-size:17px">Connect your calendar</h2>${syncCard('get')}`),
+      caption: 'Then tap <b>Get the Friends Sync shortcut</b>.' },
+    { screen: `${sb()}<div class="fill" style="background:#F2F2F7">${nav('Cancel', 'Set Up Shortcut')}
+        <div class="action" style="text-align:center"><div style="width:44px;height:44px;border-radius:11px;background:#3FBF9A;margin:4px auto 6px"></div><b>Friends sync</b></div>
+        <div class="group-title">Paste your sync code from the Friends app</div>
+        <div class="action" style="font-family:ui-monospace,Menlo,monospace;font-size:11px">4f7c19e2a0b84d6c9e31f5a7b2d08c6e</div>
+        <div class="fbtn tap" style="margin:14px 12px;background:var(--ios-blue)">Add Shortcut</div></div>`,
+      caption: 'Paste your code into the box and tap <b>Add Shortcut</b>.' },
+  ]},
+  { title: 'Allow it to send your busy times', frames: [
+    { screen: `${sb()}<div class="fill">${nav('', '')}<div class="bigtitle">Settings</div><div class="pad"><div class="rows">
+        <div class="chev">General</div><div class="chev">Notifications</div><div class="chev">Privacy &amp; Security</div><div class="chev tap">Apps</div></div></div></div>`,
+      caption: 'Open the iPhone <b>Settings</b> app and tap <b>Apps</b>.' },
+    { screen: `${sb()}<div class="fill">${nav('‹ Settings', 'Apps')}<div class="pad"><div class="rows">
+        <div class="chev">Safari</div><div class="chev">Shazam</div><div class="chev tap">Shortcuts</div><div class="chev">Spotify</div></div></div></div>`,
+      caption: 'Scroll to <b>Shortcuts</b> and tap it.' },
+    { screen: `${sb()}<div class="fill">${nav('‹ Apps', 'Shortcuts')}<div class="pad"><div class="rows">
+        <div class="chev">Siri &amp; Search</div><div class="chev tap">Advanced</div></div></div></div>`,
+      caption: 'Tap <b>Advanced</b>.' },
+    { screen: `${sb()}<div class="fill">${nav('‹ Shortcuts', 'Advanced')}<div class="pad"><div class="rows">
+        <div>Allow Running Scripts <span class="switch"></span></div>
+        <div>Allow Sharing Large Amounts of Data <span class="switch on tap"></span></div></div></div></div>`,
+      caption: 'Switch on <b>Allow Sharing Large Amounts of Data</b>.' },
+  ]},
+  { title: 'Run it once', frames: [
+    { screen: `${sb()}<div class="fill">${nav('', '', '+')}<div class="bigtitle">All Shortcuts</div>
+        <div class="tiles"><div class="tile tap" style="background:#3FBF9A">◆<span>Friends sync</span></div>
+        <div class="tile" style="background:#FF9500">◆<span>Timer</span></div></div></div>
+        <div class="tabs"><span class="on">Shortcuts</span><span>Automation</span><span>Gallery</span></div>`,
+      caption: 'Open the <b>Shortcuts</b> app and tap <b>Friends sync</b>.' },
+    { screen: `${sb()}<div class="fill"><div class="bigtitle" style="padding-top:34px">All Shortcuts</div></div><div class="dim"></div>
+        <div class="alert"><div class="msg"><b>"Friends sync" would like to access your calendars</b><span>It only reads start and end times.</span></div>
+        <div class="btns"><div>Don't Allow</div><div class="b tap">Allow Full Access</div></div></div>`,
+      caption: 'Allow access to your <b>calendars</b>.' },
+    { screen: `${sb()}<div class="fill"><div class="bigtitle" style="padding-top:34px">All Shortcuts</div></div><div class="dim"></div>
+        <div class="alert"><div class="msg"><b>Allow "Friends sync" to send data to supabase.co?</b><span>Only busy times are sent.</span></div>
+        <div class="btns"><div>Allow Once</div><div class="b tap">Always Allow</div><div>Don't Allow</div></div></div>`,
+      caption: 'Choose <b>Always Allow</b>, so it can sync by itself later.' },
+    { screen: `${sb()}<div class="fill"><div class="bigtitle" style="padding-top:34px">All Shortcuts</div></div>
+        <div class="banner"><i style="background:#3FBF9A"></i><div><b>Friends sync</b><span>Synced 214 busy times to Friends</span></div></div>`,
+      caption: 'Done when you see <b>Synced … busy times to Friends</b>.' },
+  ]},
+  { title: 'Sync every morning', frames: [
+    { screen: `${sb()}<div class="fill">${nav('', '', '+', true)}<div class="bigtitle">Automation</div>
+        <p style="text-align:center;color:var(--ios-grey);margin-top:60px">No automations yet</p></div>
+        <div class="tabs"><span>Shortcuts</span><span class="on">Automation</span><span>Gallery</span></div>`,
+      caption: 'In Shortcuts, open the <b>Automation</b> tab and tap <b>+</b>.' },
+    { screen: `${sb()}<div class="fill">${nav('Cancel', 'New Automation')}<div class="pad"><div class="rows">
+        <div class="chev tap">Time of Day</div><div class="chev">Alarm</div><div class="chev">Sleep</div><div class="chev">Arrive</div></div></div></div>`,
+      caption: 'Choose <b>Time of Day</b>.' },
+    { screen: `${sb()}<div class="fill">${nav('Back', 'When')}<div class="pad"><div class="rows">
+        <div>At <span class="pill">07:00</span></div><div>Repeat <small>Daily</small></div>
+        <div class="tap">Run Immediately <span style="color:var(--ios-blue)">✓</span></div><div>Run After Confirmation</div>
+        <div>Notify When Run <span class="switch"></span></div></div></div></div>`,
+      caption: 'Set <b>07:00</b>, <b>Daily</b> and <b>Run Immediately</b>. Turn off <b>Notify</b>.' },
+    { screen: `${sb()}<div class="fill" style="background:#F2F2F7">${nav('', 'Automation')}
+        <div class="action">⏰ At <span class="pill">07:00</span> every day</div>
+        <div class="search typed tap">🔍 Run Shortcut</div>
+        <div class="action">◆ <b>Run Shortcut</b></div></div>`,
+      caption: 'If you see a search box, search for <b>Run Shortcut</b> and tap it.' },
+    { screen: `${sb()}<div class="fill" style="background:#F2F2F7">${nav('‹', 'Automation', 'Done', true)}
+        <div class="action">⏰ At <span class="pill">07:00</span> every day</div>
+        <div class="action">◆ Run <span class="pill">Friends sync</span></div></div>`,
+      caption: 'Pick <b>Friends sync</b> and tap <b>Done</b>. It now syncs every morning.' },
+  ]},
+  { title: "You're all set", frames: [
+    { screen: friendsPage(`<h2>Hi Anna</h2><span class="ok">● Calendar synced just now</span>
+        <div class="label" style="font-size:13px;color:var(--ink);font-weight:700;margin-top:14px">Waiting for your answer</div>
+        <div class="card tap"><b>Poker night</b><br><span style="color:var(--muted);font-size:11px">Answer by Sat 7 Nov</span></div>`),
+      caption: 'When someone plans something, you get a notice. Tap <b>Yes</b>, <b>Maybe</b> or <b>No</b>, or answer straight from your calendar.' },
+  ]},
+];
+
+// ---------------------------------------------------------------- player
+const FRAME_MS = 4200, FADE_MS = 280;
+const flat = STEPS.flatMap((s, si) => s.frames.map((f, fi) => ({ ...f, si, fi })));
+const TOTAL = flat.length * FRAME_MS;
+const $ = (id) => document.getElementById(id);
+const record = new URLSearchParams(location.search).has('record');
+if (record) document.body.classList.add('record');
+$('bar').style.gridTemplateColumns = `repeat(${STEPS.length}, 1fr)`;
+$('bar').innerHTML = STEPS.map(() => '<i><b></b></i>').join('');
+
+let shown = -1;
+function show(i) {
+  if (i === shown) return;
+  shown = i;
+  const f = flat[i];
+  $('count').textContent = `Step ${f.si + 1} of ${STEPS.length}`;
+  $('title').textContent = STEPS[f.si].title;
+  $('caption').innerHTML = f.caption;
+  $('screen').innerHTML = `<div class="frame">${f.screen}</div><div class="tapmark" id="tapmark" hidden></div>`;
+  const target = $('screen').querySelector('.tap');
+  if (target) {
+    const sr = $('screen').getBoundingClientRect();
+    const tr = target.getBoundingClientRect();
+    const m = $('tapmark');
+    m.style.left = `${tr.left - sr.left - 7 + tr.width / 2}px`;
+    m.style.top = `${tr.top - sr.top - 7 + tr.height / 2}px`;
+    m.hidden = false;
+  }
+}
+
+// Everything is a pure function of time t, so the video export is frame-exact.
+function render(t) {
+  t = Math.max(0, Math.min(t, TOTAL - 1));
+  const i = Math.floor(t / FRAME_MS);
+  const local = t - i * FRAME_MS;
+  show(i);
+  const f = flat[i];
+  [...$('bar').children].forEach((el, si) => {
+    const stepFrames = flat.filter((x) => x.si === si).length;
+    let p = si < f.si ? 1 : si > f.si ? 0 : (f.fi + local / FRAME_MS) / stepFrames;
+    el.firstChild.style.width = `${p * 100}%`;
+  });
+  const frame = $('screen').querySelector('.frame');
+  frame.style.opacity = Math.min(1, local / FADE_MS);
+  const m = $('tapmark');
+  if (m && !m.hidden) {
+    const delay = 900;                      // let people read before the tap appears
+    const p = local < delay ? -1 : ((local - delay) % 1400) / 1400;
+    m.style.opacity = p < 0 ? 0 : 1;
+    const press = p < 0.15 ? 1 - p * 1.2 : 0.82 + Math.min(1, (p - 0.15) / 0.2) * 0.18;
+    m.style.setProperty('--s1', press);
+    m.style.setProperty('--s2', 1 + p * 0.9);
+    m.style.setProperty('--o2', 1 - p);
+  }
+}
+window.guide = { TOTAL, render };
+
+if (!record) {
+  let t = 0, playing = !matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
+  const setPlay = (on) => { playing = on; $('play').textContent = on ? 'Pause' : 'Play'; };
+  setPlay(playing);
+  const jump = (d) => { const i = Math.floor(t / FRAME_MS) + d; t = Math.max(0, Math.min(flat.length - 1, i)) * FRAME_MS; render(t); };
+  $('prev').onclick = () => jump(-1);
+  $('next').onclick = () => jump(1);
+  $('play').onclick = () => { if (t >= TOTAL - 1) t = 0; setPlay(!playing); };
+  (function loop(now) {
+    if (playing) { t += now - last; if (t >= TOTAL - 1) { t = TOTAL - 1; setPlay(false); } }
+    last = now; render(t); requestAnimationFrame(loop);
+  })(performance.now());
+} else {
+  render(0);
+}
+</script>
+</body>
+</html>

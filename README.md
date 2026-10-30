@@ -23,6 +23,13 @@ tests/                        tests for the suggestion logic
 
 ---
 
+## Guide for new members
+- Step-by-step guide (plays like a video, with Back/Next): https://christoffergroenfeldt-cyber.github.io/friends/guide.html
+- Same guide as a video file for group chats: https://christoffergroenfeldt-cyber.github.io/friends/guide.mp4
+
+Both are linked from the app's invite screen, the Calendar sync section and the invite message.
+To update the video after changing `guide.html`, re-record it frame by frame (headless Chromium + ffmpeg) from `guide.html?record`, where `window.guide.render(ms)` draws any moment exactly.
+
 ## Setup (about 30 minutes, once)
 
 ### 1. Create the Supabase project
