@@ -115,3 +115,6 @@ end $$;
 
 revoke execute on function public.sync_busy_lists(text, text, text, text, text) from public;
 grant  execute on function public.sync_busy_lists(text, text, text, text, text) to anon, authenticated;
+
+-- Make the API see new/changed functions straight away.
+notify pgrst, 'reload schema';
