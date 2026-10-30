@@ -230,7 +230,7 @@ function viewInstall(code) {
       </ol>
       <p class="token center" style="font-size:24px">${esc(code)}</p>
     </div>
-    <a class="btn block quiet" href="guide.html" style="margin-top:14px">Watch the setup guide (1½ min)</a>
+    <a class="btn block guide" href="guide.html"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor" opacity=".22"/><path d="M10 8l6 4-6 4z" fill="currentColor"/></svg>Watch the setup guide (1½ min)</a>
     <p class="center"><button class="link" id="browser">Use it in Safari instead</button></p>`);
   $('#browser').onclick = () => {
     sessionStorage.setItem('friends.continueInBrowser', '1');
@@ -333,7 +333,7 @@ function syncSection() {
     <div class="card stack">
       <div class="row between"><h3>Calendar sync</h3>${syncLabel(state.me)}</div>
       <p class="small muted">A Shortcut on your iPhone reads when you're busy and sends only the start and end times. Event names, places and notes never leave your phone.</p>
-      <a class="btn block quiet" href="guide.html">Watch how to set it up (1½ min)</a>
+      <a class="btn block guide" href="guide.html"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor" opacity=".22"/><path d="M10 8l6 4-6 4z" fill="currentColor"/></svg>Watch how to set it up (1½ min)</a>
       <ol class="steps">
         <li>${hasShortcut
           ? `<a class="btn quiet" href="${esc(CONFIG.SHORTCUT_URL)}" target="_blank" rel="noopener">Get the Friends Sync shortcut</a>`

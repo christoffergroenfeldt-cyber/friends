@@ -122,6 +122,8 @@ button, .btn {
 }
 button:active, .btn:active { transform: scale(0.98); }
 button:disabled { opacity: 0.45; }
+.btn.guide { background: var(--free); color: #fff; margin: 14px 0 18px; padding: 17px 18px; box-shadow: 0 0 0 4px var(--free-soft); }
+.stack > .btn.guide { margin-top: 14px; }
 .btn.block, button.block { width: 100%; }
 .btn.quiet, button.quiet { background: var(--sunken); color: var(--ink); }
 .btn.link, button.link { background: none; color: var(--accent); padding: 8px 0; font-weight: 600; }
