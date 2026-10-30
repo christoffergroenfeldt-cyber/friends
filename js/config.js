@@ -14,7 +14,7 @@ export const CONFIG = {
   VAPID_PUBLIC_KEY: '',
 
   // iCloud link to the "Friends Sync" shortcut once you have built and shared it.
-  SHORTCUT_URL: 'https://www.icloud.com/shortcuts/c00a956b43f7410f9bb841cce49357a1',
+  SHORTCUT_URL: 'https://www.icloud.com/shortcuts/87ed7c32e54444ce9bc2b7132e52e8f7',
 
   // Must match the shortcut's name exactly – used by the "Sync now" button.
   SHORTCUT_NAME: 'Friends sync',
