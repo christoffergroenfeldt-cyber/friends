@@ -11,7 +11,7 @@ export const CONFIG = {
 
   // Public VAPID key for push notifications (generate with tools/vapid.html).
   // Leave empty to run without notifications.
-  VAPID_PUBLIC_KEY: '',
+  VAPID_PUBLIC_KEY: 'BLE6V8cWn-koot3anT136Xa2CYiXxBhkcHyJQjkucaLGXIE1LxQYKtU8vj5NObe4a2g_pnmC-bmhMaO8AT0XI3o',
 
   // iCloud link to the "Friends Sync" shortcut once you have built and shared it.
   SHORTCUT_URL: 'https://www.icloud.com/shortcuts/87ed7c32e54444ce9bc2b7132e52e8f7',

@@ -167,6 +167,7 @@ async function route() {
 
     if (!state.session) return viewLogin();
     if (!state.me) await loadMe();
+    ensurePush();
 
     const pending = localStorage.getItem(LS_PENDING_INVITE);
     if (pending) {
@@ -362,8 +363,10 @@ function viewSyncSetup() {
   render(`
     <p class="lede" style="margin-top:12px">So Friends can suggest dates when you're free.</p>
     ${syncSection()}
+    ${pushCard()}
     <p style="margin-top:20px"><a class="btn block" href="#/">${state.me.last_synced_at ? 'Done' : 'I\'ll do it later'}</a></p>`, { refreshable: true });
   wireSyncSection();
+  wirePushCard();
 }
 
 // ===================================================================
@@ -397,6 +400,7 @@ async function viewHome() {
       <div class="notice"><b>${state.me.last_synced_at ? 'Your calendar is out of date.' : 'Your calendar isn\'t connected.'}</b>
       Friends can't see when you're busy. <a href="#/sync">Connect it</a></div>` : ''}
     ${!isStandalone() ? `<div class="notice small">Add Friends to your Home Screen (Share → Add to Home Screen) to get notifications.</div>` : ''}
+    ${pushCard()}
 
     ${waiting.length ? `<h2>Waiting for your answer</h2>
       <div class="list">${waiting.map((p) => planRow(p, `${groupName[p.group_id] || ''}${p.deadline ? ` · answer by ${fmtWhen(p.deadline)}` : ''}`)).join('')}</div>` : ''}
@@ -422,6 +426,7 @@ async function viewHome() {
       <button type="submit" class="quiet">Join</button>
     </form>`, { refreshable: true });
 
+  wirePushCard();
   $('#new-group').onsubmit = async (ev) => {
     ev.preventDefault();
     try {
@@ -945,14 +950,41 @@ function urlB64ToUint8Array(b64) {
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
 }
 
-async function enablePush() {
-  const perm = await Notification.requestPermission();
-  if (perm !== 'granted') throw new Error('Notifications are blocked. Allow them in iPhone Settings → Notifications → Friends.');
+const pushPossible = () => !!CONFIG.VAPID_PUBLIC_KEY && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && isStandalone();
+const pushAskable = () => pushPossible() && Notification.permission === 'default';
+
+// Already allowed on this phone? Then (re)connect silently – no tap needed.
+let pushChecked = false;
+async function ensurePush() {
+  if (pushChecked || !pushPossible() || Notification.permission !== 'granted') return;
+  pushChecked = true;
+  try { await subscribePush(); } catch (e) { console.warn('push resubscribe failed', e); }
+}
+
+async function subscribePush() {
   const reg = await navigator.serviceWorker.ready;
   let sub = await reg.pushManager.getSubscription();
   if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8Array(CONFIG.VAPID_PUBLIC_KEY) });
   const j = sub.toJSON();
   await q(sb.from('push_subscriptions').upsert({ user_id: state.me.id, endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth }, { onConflict: 'endpoint' }));
+}
+
+function pushCard() {
+  if (!pushAskable()) return '';
+  return `<div class="notice good" id="push-card"><b>Turn on notifications</b><br>
+    Get a ping when there's a new plan to answer or a date is chosen.
+    <button class="block" id="push-now" style="margin-top:10px">Turn on notifications</button></div>`;
+}
+function wirePushCard() {
+  const b = $('#push-now');
+  if (b) b.onclick = () => enablePush().then(() => { $('#push-card')?.remove(); }).catch(fail);
+}
+
+async function enablePush() {
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') throw new Error('Notifications are blocked. Allow them in iPhone Settings → Notifications → Friends.');
+  await subscribePush();
+  pushChecked = true;
   toast('Notifications are on');
 }
 
