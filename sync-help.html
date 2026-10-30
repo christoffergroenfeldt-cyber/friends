@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sync help</title>
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<style>
+  :root { --bg: #EEF1F6; --surface: #fff; --ink: #1C2333; --muted: #5B6478; --accent: #3346D3; --soft: #F8EBCB; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #121723; --surface: #1B2130; --ink: #E8ECF4; --muted: #9AA3B8; --accent: #8E9BFF; --soft: #3D3218; } }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.45 -apple-system, system-ui, sans-serif; }
+  main { max-width: 520px; margin: 0 auto; padding: 28px 16px 40px; }
+  h1 { font-size: 28px; line-height: 1.1; margin: 0 0 10px; }
+  .notice { background: var(--soft); border-radius: 16px; padding: 14px 16px; margin: 14px 0; }
+  .card { background: var(--surface); border-radius: 16px; padding: 14px 16px; margin: 12px 0; }
+  ol { padding-left: 20px; margin: 6px 0 0; } li { margin-bottom: 8px; }
+  code { font: 600 15px ui-monospace, Menlo, monospace; }
+  .muted { color: var(--muted); font-size: 15px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Shortcut not found</h1>
+  <div class="notice">The Shortcuts app has no shortcut named <b id="name">Friends sync</b>. Names must match exactly, including spaces and numbers.</div>
+
+  <div class="card"><b>Fix it in one of two ways</b>
+    <ol>
+      <li>Open the <b>Shortcuts</b> app, long-press your Friends shortcut, choose <b>Rename</b> and call it exactly <code id="name2">Friends sync</code>.</li>
+      <li>Or open <b>Friends</b> from your Home Screen, go to <b>Settings → Calendar sync</b>, and type your shortcut's exact name in <b>Your shortcut's name</b>.</li>
+    </ol>
+  </div>
+
+  <div class="card"><b>No Friends shortcut at all?</b>
+    <p class="muted" style="margin:6px 0 0">Open Friends from your Home Screen, go to Settings and tap <b>Get the Friends Sync shortcut</b>.
+    Or watch the <a href="guide.html">setup guide</a>.</p>
+  </div>
+
+  <p class="muted">You can close this page and go back to Friends on your Home Screen.</p>
+</main>
+<script>
+  const n = new URLSearchParams(location.search).get('name');
+  if (n) { document.getElementById('name').textContent = n; }
+</script>
+</body>
+</html>

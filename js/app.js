@@ -347,14 +347,33 @@ function syncSection() {
         <li>In Shortcuts, open <b>Automation</b> → <b>New Automation</b> → <b>Time of Day</b>, pick a morning time, Daily, choose <b>Run Immediately</b>, then select Friends Sync.</li>
       </ol>
       <button class="block quiet" id="sync-now">Sync now</button>
+      <label class="field" style="margin:4px 0 0"><span>Your shortcut's name in the Shortcuts app (must match exactly)</span>
+        <input type="text" id="shortcut-name" value="${esc(shortcutName())}" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
     </div>`;
 }
 
+// The shortcut's name can differ per phone (iOS adds " 2" etc. to duplicates),
+// so each person can set it; it is remembered on this phone.
+const LS_SHORTCUT = 'friends.shortcutName';
+function shortcutName() {
+  try { return localStorage.getItem(LS_SHORTCUT) || CONFIG.SHORTCUT_NAME; } catch { return CONFIG.SHORTCUT_NAME; }
+}
 function wireSyncSection() {
   $$('[data-copy]').forEach((b) => { b.onclick = () => copy(b.dataset.copy, 'Sync code copied'); });
+  const nameInput = $('#shortcut-name');
+  if (nameInput) nameInput.onchange = () => {
+    const v = nameInput.value.trim() || CONFIG.SHORTCUT_NAME;
+    nameInput.value = v;
+    try { localStorage.setItem(LS_SHORTCUT, v); } catch {}
+    toast('Shortcut name saved');
+  };
   const btn = $('#sync-now');
   if (btn) btn.onclick = () => {
-    location.href = `shortcuts://run-shortcut?name=${encodeURIComponent(CONFIG.SHORTCUT_NAME)}`;
+    const name = (nameInput?.value.trim()) || shortcutName();
+    try { localStorage.setItem(LS_SHORTCUT, name); } catch {}
+    // If the shortcut isn't found, Shortcuts opens the help page instead of a bare error.
+    const help = `${location.origin}${location.pathname}sync-help.html?name=${encodeURIComponent(name)}`;
+    location.href = `shortcuts://x-callback-url/run-shortcut?name=${encodeURIComponent(name)}&x-error=${encodeURIComponent(help)}`;
   };
 }
 
