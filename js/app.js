@@ -358,15 +358,49 @@ function wireSyncSection() {
   };
 }
 
-function viewSyncSetup() {
+async function viewSyncSetup() {
+  const cals = await loadCalendars();
   topbar('Connect your calendar');
   render(`
     <p class="lede" style="margin-top:12px">So Friends can suggest dates when you're free.</p>
     ${syncSection()}
+    ${calendarsSection(cals)}
     ${pushCard()}
     <p style="margin-top:20px"><a class="btn block" href="#/">${state.me.last_synced_at ? 'Done' : 'I\'ll do it later'}</a></p>`, { refreshable: true });
   wireSyncSection();
+  wireCalendars();
   wirePushCard();
+}
+
+
+// ===================================================================
+// Which calendars count (names are private to the owner)
+// ===================================================================
+async function loadCalendars() {
+  try { return await q(sb.from('user_calendars').select('id,name,included').eq('user_id', state.me.id).order('name')); }
+  catch { return []; }
+}
+function calendarsSection(cals) {
+  if (!state.me.last_synced_at) return '';
+  return `
+    <div class="card stack" style="margin-top:12px" id="cals">
+      <h3>Calendars that make you busy</h3>
+      <p class="small muted">Only you can see these names. Friends only see when you're busy.</p>
+      ${cals.length ? cals.map((c) => `
+        <label class="switch"><span>${esc(c.name)}</span>
+          <input type="checkbox" data-cal="${c.id}" ${c.included ? 'checked' : ''}></label>`).join('')
+      : '<p class="small">Your shortcut doesn\'t send calendar names yet. Get the latest Friends Sync shortcut above, then run it once, and your calendars will show up here.</p>'}
+    </div>`;
+}
+function wireCalendars() {
+  $$('[data-cal]').forEach((box) => {
+    box.onchange = async () => {
+      try {
+        await q(sb.from('user_calendars').update({ included: box.checked }).eq('id', box.dataset.cal));
+        toast(box.checked ? 'Calendar included' : 'Calendar ignored');
+      } catch (e) { box.checked = !box.checked; fail(e); }
+    };
+  });
 }
 
 // ===================================================================
@@ -833,6 +867,7 @@ async function viewPlan(pid) {
 // ===================================================================
 async function viewSettings() {
   topbar('Settings', { back: '#/' });
+  const cals = await loadCalendars();
   const manual = await q(sb.from('busy_blocks').select('*').eq('user_id', state.me.id).eq('source', 'manual').gte('ends_at', new Date().toISOString()).order('starts_at'));
   const pushSupported = 'serviceWorker' in navigator && 'PushManager' in window && !!CONFIG.VAPID_PUBLIC_KEY;
   let pushOn = false;
@@ -848,6 +883,7 @@ async function viewSettings() {
     </form>
 
     ${syncSection()}
+    ${calendarsSection(cals)}
 
     <div class="card stack" style="margin-top:12px">
       <label class="switch"><span>All-day events make me busy</span>
@@ -893,6 +929,7 @@ async function viewSettings() {
     </div>`, { refreshable: false });
 
   wireSyncSection();
+  wireCalendars();
 
   $('#name-form').onsubmit = async (ev) => {
     ev.preventDefault();

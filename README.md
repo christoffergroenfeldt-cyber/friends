@@ -88,11 +88,15 @@ Open **Shortcuts → +** and add these actions in order. Replace `YOUR-PROJECT` 
 7. **Set Variable** – `Ends`, input *Text*.
 8. **Text** – *Calendar Events* → **Is All Day**.
 9. **Set Variable** – `AllDay`, input *Text*.
-10. **Get Contents of URL**
+10. **Text** – *Calendar Events* → **Calendar** (the calendar's name; lets each person pick calendars in the app).
+11. **Set Variable** – `Calendars`, input *Text*.
+12. **Get Contents of URL**
     - URL: `https://YOUR-PROJECT.supabase.co/rest/v1/rpc/sync_busy_lists`
     - Method: **POST**, Header `apikey` = `YOUR-ANON-KEY`
-    - Request Body **JSON**, four Text fields: `p_token` = *Token*, `p_starts` = *Starts*, `p_ends` = *Ends*, `p_allday` = *AllDay*
-11. **Show Notification** – *Contents of URL*.
+    - Request Body **JSON**, five Text fields: `p_token` = *Token*, `p_starts` = *Starts*, `p_ends` = *Ends*, `p_allday` = *AllDay*, `p_calendars` = *Calendars*
+13. **Show Notification** – *Contents of URL*.
+
+Calendar names are stored only for their owner (friends can't read them). In the app, **Settings → Calendars that make you busy** switches each calendar on or off, effective immediately. Uploads with more than 40 different calendar names are rejected, so event titles can't be sent by mistake.
 
 Name the shortcut exactly **Friends Sync** (the app's *Sync now* button runs it by name).
 
