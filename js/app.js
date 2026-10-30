@@ -416,7 +416,7 @@ function wireCalendars() {
     box.onchange = async () => {
       try {
         await q(sb.from('user_calendars').update({ included: box.checked }).eq('id', box.dataset.cal));
-        toast(box.checked ? 'Calendar included' : 'Calendar ignored');
+        toast(box.checked ? 'Included. Tap Sync now to add its busy times.' : 'Ignored from now on', 4000);
       } catch (e) { box.checked = !box.checked; fail(e); }
     };
   });

@@ -57,6 +57,8 @@ declare
   st timestamptz; en timestamptz;
   keep int[] := '{}';
   names text[];
+  n_saved int := 0;
+  n_off int := 0;
 begin
   select user_id into uid from public.user_tokens where sync_token = trim(coalesce(p_token, ''));
   if uid is null then
@@ -107,10 +109,18 @@ begin
          lower(a[k]) in ('yes', 'true', '1', 'ja'),
          'calendar',
          (select id from public.user_calendars where user_id = uid and name = c[k])
-  from unnest(keep) k;
+  from unnest(keep) k
+  -- Calendars switched off in the app are not stored at all.
+  where coalesce((select included from public.user_calendars where user_id = uid and name = c[k]), true);
+  get diagnostics n_saved = row_count;
+
+  select count(*) into n_off from public.user_calendars
+   where user_id = uid and not included and name = any(coalesce(names, '{}'));
 
   update public.profiles set last_synced_at = now() where id = uid;
-  return format('Synced %s busy times from %s calendars to Friends', coalesce(array_length(keep, 1), 0), coalesce(array_length(names, 1), 0));
+  return format('Synced %s busy times from %s calendars to Friends%s',
+                n_saved, coalesce(array_length(names, 1), 0) - n_off,
+                case when n_off > 0 then format(' (%s switched off in Friends were skipped)', n_off) else '' end);
 end $$;
 
 revoke execute on function public.sync_busy_lists(text, text, text, text, text) from public;
